@@ -1,15 +1,15 @@
 ---
-title: "I Freed 45 GB From My MacBook With One Claude Command"
-subtitle: "How I built DevClean — an AI-powered Claude Code skill that actually understands your dev toolchain"
-slug: devclean-ai-powered-macos-developer-cleanup
-tags: macos, linux, windows, developer-tools, claude, ai, productivity
+title: "I Freed 45 GB of Dev Disk Space With One Claude Code Command"
+subtitle: "How I built DevClean — an AI-powered Claude Code skill that finds and safely removes developer tool bloat on macOS, Linux, and Windows"
+slug: devclean-ai-powered-developer-disk-cleanup
+tags: developer-tools, productivity, devops, claude-code, tooling
 canonical_url: ""
-cover_image: <!-- TODO: Add cover image URL — suggested: terminal screenshot showing DevClean scan output -->
+cover_image: <!-- TODO: Add cover image URL — suggested: terminal screenshot showing DevClean scan output with size annotations -->
 publishAs: ""
 series: ""
 ---
 
-# I Freed 45 GB From My MacBook With One Claude Command
+# I Freed 45 GB of Dev Disk Space With One Claude Code Command
 
 Last week, my MacBook told me I had 14 GB of free space. I'm running a 512 GB drive. Where did it all go?
 
@@ -17,7 +17,7 @@ I opened Finder, sorted by size, and found the usual suspects — but what shock
 
 Cursor's `state.vscdb.backup` file alone was **21 GB**. One file. A SQLite backup from my code editor.
 
-That kicked off a three-hour deep dive that changed how I think about developer workstation maintenance — and ended with me building a tool to make sure I never have to do it manually again.
+That kicked off a deep dive that changed how I think about developer workstation maintenance — and ended with me building a tool to make sure I never have to do it manually again.
 
 ## The Hidden Cost of Being a Developer
 
@@ -48,17 +48,17 @@ I tried the obvious solutions first.
 
 Here's the fundamental problem: **these tools don't understand developer toolchains at a semantic level.**
 
-They can't read an AVD's `config.ini` to figure out which system images are actively referenced and which are orphaned. They can't look at your iOS simulators and realize you have eight iPhone 14 Pro devices across four iOS versions when you only need one per version. They can't assess risk — is deleting this cache going to cost you a 20-minute rebuild, or is it completely safe?
+They can't read an AVD's `config.ini` to figure out which system images are actively referenced and which are orphaned. They can't look at your iOS simulators and realize you have eight iPhone 14 Pro devices across four iOS versions when you only need one per version. They can't assess risk — will deleting this cache cost you a 20-minute rebuild, or is it completely safe?
 
 I needed something smarter.
 
 ## Introducing DevClean
 
-DevClean is a Claude Code skill that performs intelligent, developer-aware cleanup of your developer workstation (macOS, Linux, and Windows). It's not a compiled binary or an Electron app. It's an AI skill that runs inside Claude Code, which means it can actually *reason* about what it finds.
+DevClean is a Claude Code skill that performs intelligent cleanup of your developer workstation across macOS, Linux, and Windows. It's not a compiled binary or an Electron app. It's an AI skill that runs inside Claude Code, which means it can actually *reason* about what it finds.
 
 The workflow is straightforward:
 
-```
+```text
 You: /devclean
 
 DevClean: Scanning your development environment...
@@ -83,7 +83,7 @@ Found 7 cleanup opportunities across 5 categories:
 
  PACKAGE MANAGER CACHES                                8.7 GB
  ├── Yarn global cache             5.6 GB   [SAFE]
- └── Cypress binary cache          3.1 GB   [REBUILD: ~3 min]
+ └── Cypress binary cache          3.1 GB   [REBUILD: ~3-15 min]
 
 Risk Legend:  [SAFE] = no rebuild cost
               [REBUILD: Xm] = will need re-download on next use
@@ -93,9 +93,9 @@ But the interesting part isn't the scan. It's what happens next.
 
 ## Intelligence, Not Just Inventory
 
-When I told DevClean to clean up my iOS simulators, I said: "keep one representative device per iOS version." It didn't just blindly delete random simulators. It analyzed the device types, picked the most commonly used form factor for each iOS version, and presented its reasoning:
+When I told DevClean to clean up my iOS simulators, I said: "keep one representative device per iOS version." Here's what it presented:
 
-```
+```bash
 You: Clean up the iOS simulators. Keep one per iOS version.
 
 DevClean: Here's my plan:
@@ -117,23 +117,15 @@ DevClean: Here's my plan:
  Proceed? [y/N]
 ```
 
-This is the key differentiator. DevClean doesn't just find big files. It makes **judgment calls** — the kind a senior developer would make — and explains its reasoning before touching anything.
+This is the differentiator. DevClean doesn't just find big files. It makes **judgment calls** — the kind a senior developer would make — and explains its reasoning before touching anything.
 
-For Android, it reads each AVD's `config.ini` and `hardware-qemu.ini` to trace exactly which system images are in use. Only images with zero references get flagged as orphaned. It knows the difference between "this AVD uses API 33 x86_64" and "this system image for API 33 arm64-v8a is sitting here unused."
+For Android, it reads each AVD's `config.ini` to trace exactly which system images are in use. Only images with zero references get flagged as orphaned. It knows the difference between "this AVD uses API 33 x86_64" and "this system image for API 33 arm64-v8a is sitting here unused."
 
-For package manager caches, it checks when each cache was last accessed and estimates the rebuild cost. Deleting your Yarn cache is free — `yarn install` will re-fetch in seconds. Deleting your Cypress cache means a ~3-minute Electron binary download next time you run tests. You should know that before you say yes.
+For package manager caches, it checks when each cache was last accessed and estimates rebuild cost. Deleting your Yarn cache is free — `yarn install` will re-download on next run. Deleting your Cypress cache means Electron binary re-download next time you run tests (roughly 3–15 minutes depending on version and connection speed). You should know that before you say yes.
 
-## How It Works Under the Hood
+## How It Works
 
-DevClean runs as a Claude Code custom skill. That means it has access to Claude's reasoning capabilities while operating within your terminal. The architecture is simple:
-
-1. **Scan** — Walks known developer tool paths (`~/.android/avd`, `~/Library/Developer/CoreSimulator`, `~/Library/Caches`, etc.) and catalogs what it finds
-2. **Analyze** — Reads configuration files, checks cross-references between components, calculates last-used timestamps, and risk-rates every item
-3. **Recommend** — Presents a prioritized cleanup plan with estimated space savings and risk levels
-4. **Confirm** — Nothing is deleted without explicit approval. Every action is explained before execution
-5. **Clean** — Executes the approved deletions and reports the actual space recovered
-
-The "analyze" step is where the AI reasoning matters. A shell script can tell you a folder is 8 GB. It takes actual understanding of Android's emulator architecture to know that deleting `system-images/android-30/google_apis/x86_64` is safe because no AVD in `~/.android/avd/` references API 30 x86_64 anymore.
+A shell script can tell you a folder is 8 GB. It takes actual understanding of Android's emulator architecture to know that deleting `system-images/android-30/google_apis/x86_64` is safe because no AVD in `~/.android/avd/` references API 30 x86_64 anymore. That reasoning is what DevClean brings — Claude operating inside a sandboxed skill with explicit permissions and a module system that encodes domain knowledge for each toolchain.
 
 ## Getting Started
 
@@ -163,39 +155,34 @@ claude
 /devclean
 ```
 
-DevClean runs a full scan, presents everything it finds, and lets you pick what to clean. You can tell it things like "only clean the safe items" or "skip the Android stuff" — it's a conversation, not a CLI with flags. There's no `--force` mode. That's intentional.
+DevClean runs a full scan, presents everything it finds, and lets you pick what to clean. You can tell it things like "only clean the safe items" or "skip the Android stuff" — it's a conversation, not a CLI with flags. There's no `--force` mode.
 
-## What DevClean Doesn't Do
+## Current Limitations
 
-Being honest about limitations:
-
-- **It's cross-platform.** macOS, Linux, and Windows (via Git Bash) are all supported. Platform-specific modules load automatically — you only see what's relevant to your machine.
 - **It doesn't run on a schedule.** You invoke it when you want it. There's no background daemon.
 - **Docker cleanup is conservative.** It scans Docker usage and offers `docker system prune`, but won't touch volumes without explicit confirmation due to data loss risk.
 - **It requires Claude Code.** If you're not already using Claude Code as your AI coding assistant, this skill won't work standalone.
 
-## What's Next
+## What's Live + What's Next
 
-The roadmap for DevClean includes:
+**Currently shipped — 19 modules total:**
+macOS, Linux, and Windows are all supported. Active modules include Android, iOS, Xcode, Node.js, Python, Rust, Java, .NET, Docker, Homebrew, JetBrains, Cursor, VS Code, browsers, Linux system caches, Windows system caches, Visual Studio, WSL2, and Windows package managers.
 
-- **Cross-platform shipped** — macOS, Linux, and Windows modules are live. 19 toolchain modules total.
-- **CI cache analysis** — Connect to your GitHub Actions or CircleCI caches and identify what's actually being used versus just accumulating.
-- **Homebrew audit** — Find formulae and casks you installed once for a side project and never touched again.
-- **Workspace-aware cleanup** — Tie cleanup recommendations to your active projects. If you haven't opened a React Native project in 6 months, maybe those specific emulator configs can go.
-- **Scheduled scans** — Monthly cleanup reminders with delta reports showing what grew since last scan.
+**On the roadmap:**
+- **CI cache analysis** — connect to GitHub Actions or CircleCI caches and identify what's accumulating vs. what's being used
+- **Workspace-aware cleanup** — tie recommendations to active projects; if you haven't opened a React Native project in 6 months, those specific emulator configs can probably go
+- **Scheduled scans** — monthly cleanup reminders with delta reports showing what grew since last scan
 
 ## Try It
 
-DevClean is open source and free.
+**[github.com/mohdashraf010897/devclean](https://github.com/mohdashraf010897/devclean)** — open source, free, MIT licensed.
 
-**GitHub:** [github.com/mohdashraf010897/devclean](https://github.com/mohdashraf010897/devclean)
-
-If you're a developer on macOS, run a quick scan. You'll probably be surprised at what you find. I was sitting on 45 GB of recoverable space and had no idea — and I *actively* try to keep my machine clean.
+If you're a developer on macOS, Linux, or Windows, run a quick scan. Most developers are surprised at what they find — I was sitting on 45 GB of recoverable space and had no idea.
 
 If you find it useful, star the repo and share it with your team. If you find a bug or want to add a new cleanup category, PRs are welcome.
 
-The best part about building this as a Claude Code skill rather than a traditional app: adding support for a new tool category doesn't require writing a parser. You describe the tool's file layout and configuration format, and the AI figures out the rest. That's a genuinely different approach to developer tooling — and I think we're only scratching the surface of what's possible here.
+The best part about building this as a Claude Code skill rather than a traditional app: adding support for a new tool category doesn't require writing a parser. Describe the tool's file layout and configuration format, and the AI figures out the rest. That's a fundamentally different approach to developer tooling.
 
 ---
 
-*Built by [Mohd Ashraf](https://github.com/mohdashraf010897). If you have questions or want to contribute, open an issue on the repo or find me on Twitter/X.*
+*Built by [Mohd Ashraf](https://github.com/mohdashraf010897). Questions or contributions — open an issue on the repo.*
