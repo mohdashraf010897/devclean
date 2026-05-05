@@ -4,7 +4,7 @@ subtitle: "DevClean is a free Claude Code skill that scans your dev toolchain â€
 slug: devclean-ai-powered-developer-disk-cleanup
 tags: developer-tools, productivity, devops, claude-code, tooling
 canonical_url: ""
-cover_image: <!-- Upload blog/images/cover.jpg to Hashnode and paste the CDN URL here -->
+cover_image: <!-- Upload blog/images/og-cover.jpg to Hashnode and paste the CDN URL here -->
 publishAs: ""
 series: ""
 ---
