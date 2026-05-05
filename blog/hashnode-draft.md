@@ -4,7 +4,7 @@ subtitle: "How I built DevClean — an AI-powered Claude Code skill that finds a
 slug: devclean-ai-powered-developer-disk-cleanup
 tags: developer-tools, productivity, devops, claude-code, tooling
 canonical_url: ""
-cover_image: <!-- TODO: Add cover image URL — suggested: terminal screenshot showing DevClean scan output with size annotations -->
+cover_image: <!-- Upload blog/images/cover.jpg to Hashnode and paste the CDN URL here -->
 publishAs: ""
 series: ""
 ---
@@ -34,6 +34,8 @@ Here's what I found when I actually looked:
 
 **Total recovered: ~45 GB.**
 
+![Where did my disk space go? — breakdown of 45 GB across Cursor backup, Android emulators, iOS simulators, Yarn, Cypress, and JetBrains](./images/disk-breakdown.jpg)
+
 And this isn't unusual. If you're a mobile developer or full-stack engineer on macOS, you're probably sitting on 50-100 GB of dev tool bloat right now. You just don't know it because these files hide in `~/Library`, `~/.android`, and `~/Library/Developer/CoreSimulator` — places you never browse.
 
 ## Why Existing Tools Don't Cut It
@@ -51,6 +53,8 @@ Here's the fundamental problem: **these tools don't understand developer toolcha
 They can't read an AVD's `config.ini` to figure out which system images are actively referenced and which are orphaned. They can't look at your iOS simulators and realize you have eight iPhone 14 Pro devices across four iOS versions when you only need one per version. They can't assess risk — will deleting this cache cost you a 20-minute rebuild, or is it completely safe?
 
 I needed something smarter.
+
+![Other tools see a folder. DevClean reads config.ini and traces exactly which Android system images are in use vs orphaned.](./images/semantic-analysis.jpg)
 
 ## Introducing DevClean
 
@@ -122,6 +126,8 @@ This is the differentiator. DevClean doesn't just find big files. It makes **jud
 For Android, it reads each AVD's `config.ini` to trace exactly which system images are in use. Only images with zero references get flagged as orphaned. It knows the difference between "this AVD uses API 33 x86_64" and "this system image for API 33 arm64-v8a is sitting here unused."
 
 For package manager caches, it checks when each cache was last accessed and estimates rebuild cost. Deleting your Yarn cache is free — `yarn install` will re-download on next run. Deleting your Cypress cache means Electron binary re-download next time you run tests (roughly 3–15 minutes depending on version and connection speed). You should know that before you say yes.
+
+![DevClean cleanup plan — numbered table with Safe/Review risk badges, toolchain names, actions, and estimated sizes. Total: ~45 GB](./images/cleanup-plan.jpg)
 
 ## How It Works
 
