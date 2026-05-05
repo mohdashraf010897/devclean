@@ -1,6 +1,6 @@
 ---
 title: "I Freed 45 GB of Dev Disk Space With One Claude Code Command"
-subtitle: "How I built DevClean — an AI-powered Claude Code skill that finds and safely removes developer tool bloat on macOS, Linux, and Windows"
+subtitle: "DevClean is a free Claude Code skill that scans your dev toolchain — Android, iOS, Node.js, and more — and safely removes bloat on macOS and Linux."
 slug: devclean-ai-powered-developer-disk-cleanup
 tags: developer-tools, productivity, devops, claude-code, tooling
 canonical_url: ""
