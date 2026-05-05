@@ -3,6 +3,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/mohdashraf010897/devclean?style=flat-square)](https://github.com/mohdashraf010897/devclean/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Made for Claude Code](https://img.shields.io/badge/Made%20for-Claude%20Code-blueviolet?style=flat-square)](https://docs.anthropic.com/en/docs/claude-code)
+[![Read the blog post](https://img.shields.io/badge/Blog-How%20I%20freed%2045%20GB-orange?style=flat-square)](https://ashraf.hashnode.dev/devclean-ai-powered-developer-disk-cleanup)
 
 **AI-powered cross-platform developer workstation cleanup that actually understands your toolchain.**
 
